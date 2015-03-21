@@ -4,8 +4,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -21,26 +23,314 @@ import org.json.simple.parser.ParseException;
 public class App 
 {
 	public static List<Pagerank> pages = new ArrayList<Pagerank>();
+	public static List<String> url = new ArrayList<String>();
+	public static Map<String,Double> urlValues = new HashMap<String, Double>();
+	public static List<Pagerank> tempList = new ArrayList<Pagerank>();
+	
+	
+	public static List<Pagerank> tempFinalList = new ArrayList<Pagerank>();
+	public static List<Pagerank> finalList = new ArrayList<Pagerank>();
+	
+	
 	
     public static void main( String[] args )
     {
         //System.out.println( "Hello World!" + args[1]);
-        String word="apple";
+        String word="mac";
     	
     	
     	String indexPath = "C:\\Users\\RishiSuresh\\workspace\\webCrawler\\target\\data\\Crawler\\index.json";    	
+    	String rankPath = "C:\\Users\\RishiSuresh\\workspace\\webCrawler\\target\\data\\Crawler\\rank.json";  
     	
     	readIndexer(indexPath,word);
     	
+    	rankReader(rankPath);
+        privateRank(word);
     	
-        //privateRank(word);
-    	
+        sort();
+        
     	print();
     	
         
     }
     
-    private static void print()
+    private static void sort() 
+    {
+    	tempList = pages;  	
+    	
+    	sortBasedOnTfid(tempList);
+    	
+    	sortBasedOnWordCount(tempList);
+    	
+    	sortBasedOnPrivateValue(tempList);
+    	
+    	sortBasedOnPageRankValue(tempList);
+    	
+    	System.out.println(finalList.size());
+    	for(Pagerank p: finalList)
+		{
+
+    		System.out.println("url "+p.getUrl());
+    		System.out.println("desc "+p.getDescription());
+    		System.out.println("tfid "+p.getTfid());
+    		System.out.println("title"+p.getTitle());
+    		System.out.println("localpath "+p.getLocalPath());
+    		System.out.println("count "+p.getCount());
+    		System.out.println("author "+p.getAuthor());
+    		System.out.println("pageAnalysis "+ p.getPageAnalysisValue());
+    		System.out.println("private "+ p.getPrivateRankValue());
+    		System.out.println("---------------------------------------------------");
+		}
+    	
+	}
+    
+
+
+	private static void sortBasedOnPageRankValue(List<Pagerank> tempList2) 
+	{
+		for(int i=0;i<tempList2.size();i++)
+		{
+			for(int j=0;j<tempList2.size()-1;j++)
+			{
+				Pagerank p1 = tempList2.get(j);
+				Pagerank p2 = tempList2.get(j+1);
+				
+				if(p1.getPageAnalysisValue()<p2.getPageAnalysisValue())
+				{
+					Pagerank temp = p1;
+					p1=p2;				
+					tempList2.set(j, p1);
+					p2=temp;
+					tempList2.set(j+1, p2);
+				}
+			}		
+		}
+		
+		/*System.out.println(tempList2.size());
+    	for(Pagerank p: tempList2)
+		{
+
+    		System.out.println("url "+p.getUrl());
+    		System.out.println("desc "+p.getDescription());
+    		System.out.println("tfid "+p.getTfid());
+    		System.out.println("title"+p.getTitle());
+    		System.out.println("localpath "+p.getLocalPath());
+    		System.out.println("count "+p.getCount());
+    		System.out.println("author "+p.getAuthor());
+    		System.out.println("pageAnalysis "+ p.getPageAnalysisValue());
+    		System.out.println("private "+ p.getPrivateRankValue());
+    		System.out.println("---------------------------------------------------");
+		}*/
+		
+		
+		if(tempList2.size()<10)
+		{
+			for(int i=0;i<tempList2.size();i++)
+			{			
+				finalList.add(tempList2.get(i));
+			}
+		}
+		else
+		{
+			for(int i=0;i<10;i++)
+			{			
+				finalList.add(tempList2.get(i));
+			}
+		}
+		
+	}
+
+	private static void sortBasedOnPrivateValue(List<Pagerank> tempList2)
+	{
+		for(int i=0;i<tempList2.size();i++)
+		{
+			for(int j=0;j<tempList2.size()-1;j++)
+			{
+				Pagerank p1 = tempList2.get(j);
+				Pagerank p2 = tempList2.get(j+1);
+				
+				if(p1.getPrivateRankValue()<p2.getPrivateRankValue())
+				{
+					Pagerank temp = p1;
+					p1=p2;				
+					tempList2.set(j, p1);
+					p2=temp;
+					tempList2.set(j+1, p2);
+				}
+			}		
+		}
+		
+		if(tempList2.size()<10)
+		{
+			for(int i=0;i<tempList2.size();i++)
+			{			
+				if(!tempFinalList.contains(tempList2.get(i)))
+					tempFinalList.add(tempList2.get(i));
+			}
+		}
+		else
+		{
+			for(int i=0;i<10;i++)
+			{			
+				if(!tempFinalList.contains(tempList2.get(i)))
+					tempFinalList.add(tempList2.get(i));
+			}
+		}		
+		
+	}
+
+	private static void sortBasedOnWordCount(List<Pagerank> tempList2) 
+	{
+		for(int i=0;i<tempList2.size();i++)
+		{
+			for(int j=0;j<tempList2.size()-1;j++)
+			{
+				Pagerank p1 = tempList2.get(j);
+				Pagerank p2 = tempList2.get(j+1);
+				
+				if(p1.getCount()<p2.getCount())
+				{
+					Pagerank temp = p1;
+					p1=p2;				
+					tempList2.set(j, p1);
+					p2=temp;
+					tempList2.set(j+1, p2);
+				}
+			}		
+		}
+		
+		if(tempList2.size()<10)
+		{
+			for(int i=0;i<tempList2.size();i++)
+			{			
+				if(!tempFinalList.contains(tempList2.get(i)))
+					tempFinalList.add(tempList2.get(i));
+			}
+		}
+		else
+		{
+			for(int i=0;i<10;i++)
+			{			
+				if(!tempFinalList.contains(tempList2.get(i)))
+					tempFinalList.add(tempList2.get(i));
+			}
+		}		
+		
+		
+	}
+
+	private static void sortBasedOnTfid(List<Pagerank> tempList2) 
+	{
+		for(int i=0;i<tempList2.size();i++)
+		{
+			for(int j=0;j<tempList2.size()-1;j++)
+			{
+				Pagerank p1 = tempList2.get(j);
+				Pagerank p2 = tempList2.get(j+1);
+				
+				if(p1.getTfid()<p2.getTfid())
+				{
+					Pagerank temp = p1;
+					p1=p2;				
+					tempList2.set(j, p1);
+					p2=temp;
+					tempList2.set(j+1, p2);
+				}
+			}		
+		}
+		
+		if(tempList!=null)
+			
+		
+		if(tempList2.size()<10)
+		{
+			for(int i=0;i<tempList2.size();i++)
+			{			
+				if(!tempFinalList.contains(tempList2.get(i)))
+					tempFinalList.add(tempList2.get(i));
+			}
+		}
+		else
+		{
+			for(int i=0;i<10;i++)
+			{			
+				if(!tempFinalList.contains(tempList2.get(i)))
+					tempFinalList.add(tempList2.get(i));
+			}
+		}		
+	}
+
+	private static void rankReader(String rankPath) 
+    {
+    		JSONParser parser = new JSONParser();
+    		Object object;    		
+
+    		try
+    		{
+    			object = parser.parse(new FileReader(rankPath));
+    			JSONArray jsonArray = (JSONArray) object;   			
+    			
+    			System.out.println(jsonArray.size());
+    			
+    			
+    			for(Object o : jsonArray)
+    			{    				
+    				JSONObject jsonObj = (JSONObject) o;
+    				String url = jsonObj.get("url").toString();
+    				Double value =Double.parseDouble(jsonObj.get("value").toString());
+    				
+    				for(Pagerank p: pages)
+    				{
+    					if(p.getUrl().equals(url))
+    					{
+    						p.setPageAnalysisValue(value);
+    						break;
+    					}
+    				}
+    							
+    			}
+    			
+    			/*for(Object o : jsonArray)
+    			{
+    				
+    				JSONObject jsonObj = (JSONObject) o;
+    				
+    				Set<String> keys = jsonObj.keySet();
+    				
+    				for(String s: keys)
+    				{
+    					url.add(s);
+    				} 				
+    			}
+    			
+    			for(Object o : jsonArray)
+    			{
+    				
+    				JSONObject jsonObj = (JSONObject) o;
+    				
+    				Double value = jsonObj.get(key)		
+    			}
+    			
+    			
+    			for(Pagerank p: pages)
+    			{
+    				double pageAnalysis;
+    				if(jsonArray.contains(p.getUrl()))
+    				{	
+    					int index = jsonArray.indexOf(p.getUrl());
+    					pageAnalysis =Double.parseDouble(jsonArray.get(index).toString());
+    					p.setPageAnalysisValue(pageAnalysis);
+    				}
+    			}*/
+    		}
+    		catch(Exception e)
+    		{
+    			System.out.println("Error occured");
+    		}
+		
+	}
+
+	private static void print()
     {
     	for(Pagerank p: pages)
     	{
@@ -51,6 +341,8 @@ public class App
     		System.out.println("localpath "+p.getLocalPath());
     		System.out.println("count "+p.getCount());
     		System.out.println("author "+p.getAuthor());
+    		System.out.println("pageAnalysis "+ p.getPageAnalysisValue());
+    		System.out.println("private "+ p.getPrivateRankValue());
     		System.out.println("---------------------------------------------------");
     	}
     }
@@ -203,7 +495,27 @@ public class App
 
 	public static void privateRank(String word)
     {
-    	System.out.println(word);
+		
+		// default private rank value
+    	for(Pagerank p: pages)
+    	{
+    		p.setPrivateRankValue(1);
+    	}
+    	
+    	for(Pagerank p: pages)
+    	{
+    		if(p.getTitle().toLowerCase().contains(word.toLowerCase()))
+    			p.setPrivateRankValue(p.getPrivateRankValue()+1);
+    		
+    		if(p.getDescription().toLowerCase().contains(word.toLowerCase()))
+    			p.setPrivateRankValue(p.getPrivateRankValue()+1);
+    		
+    		if(p.getAuthor().toLowerCase().contains(word.toLowerCase()))
+    			p.setPrivateRankValue(p.getPrivateRankValue()+1); 		
+    		
+    	}
+    			
+    	
     }
     
     

@@ -1,6 +1,9 @@
 package cs454.wordSearch.wordSearch;
 
-public class Pagerank
+import java.util.Comparator;
+
+
+public class Pagerank 
 {
 	String url;
 	String description;
@@ -90,7 +93,33 @@ public class Pagerank
 		this.privateRankValue = privateRankValue;
 	}
 	
-	
-	
+	/*public static Comparator<Pagerank> StuNameComparator = new Comparator<Pagerank>() {
+
+		public int compare(Pagerank s1, Pagerank s2) {
+			
+			double tfid1 = s1.getTfid();
+			double tfid2 = s2.getTfid();
+
+		   //ascending order
+		   return (int) (tfid1-tfid2);
+
+		   //descending order
+		   //return StudentName2.compareTo(StudentName1);
+	    }};*/
+
+	    /*Comparator for sorting the list by roll no
+	    public static Comparator<Student> StuRollno = new Comparator<Student>() {
+
+		public int compare(Student s1, Student s2) {
+
+		   int rollno1 = s1.getRollno();
+		   int rollno2 = s2.getRollno();
+
+		   For ascending order
+		   return rollno1-rollno2;
+
+		   For descending order
+		   //rollno2-rollno1;
+	   }};*/
 	
 }
